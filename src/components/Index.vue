@@ -164,11 +164,9 @@
 </template>
 
 <script>
- import {swiper,redPacket,message,getTop,productPage,newRedEnvelope} from '../api/index'
-//  import { slider, slideritem } from 'vue-concise-slider';
+import {swiper,redPacket,message,getTop,productPage,newRedEnvelope} from '../api/index'
+ import { slider, slideritem } from 'vue-concise-slider';
  import Recommend from './recommend'
-  import slider from './slider'
-
  import Loadmore from './loadeMore'
  import myScroll  from './vue-scroll'
 
