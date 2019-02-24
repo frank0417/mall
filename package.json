@@ -20,14 +20,12 @@
     "less-loader": "^4.1.0",
     "vue": "^2.5.2",
     "vue-clipboard2": "^0.2.1",
-    "swiper": "^4.4.2",
+    "vue-concise-slider": "^3.3.8",
     "vue-router": "^3.0.1",
     "vue-scroller": "^2.2.4",
     "wc-messagebox": "^1.10.1"
   },
   "devDependencies": {
-    "node-sass": "^4.9.4",
-    "sass-loader": "^7.1.0",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-helper-vue-jsx-merge-props": "^2.0.3",
@@ -74,11 +72,7 @@
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",
-    "webpack-merge": "^4.1.0",
-  
-    "style-loader": "^0.23.1",
-    "stylus-loader": "^3.0.2"
-
+    "webpack-merge": "^4.1.0"
   },
   "engines": {
     "node": ">= 6.0.0",

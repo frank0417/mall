@@ -8,7 +8,7 @@
     class="z_index"
     
   >
-  <my-scroll ref="myScroll" :on-refresh="onRefresh" :get-scroll-top="getTopF" :scroll-state="scrollState">
+   <my-scroll ref="myScroll" :on-refresh="onRefresh" :get-scroll-top="getTopF" :scroll-state="scrollState">
 					<div slot="scrollList">
       <header class="header" ref="refreshT">
         <div class="header_wrap">
@@ -23,10 +23,12 @@
         </div>
       </header>
         <article class="swiper">
-          <slider :imgUrl="headList"></slider>
-            
+          <slider ref="slider" :options="options">
+              <slideritem v-for="(item,index) in swiperList" :key="index" :style="item.style">
+                  <img :src="item.thumbnail" alt=""  @click="swiperJump(item.url)" style="width: 100%;height: 100%;">
+              </slideritem>
+          </slider>
        </article>
-       
        <!-- 爆款排行 -->
        <article class="hot_sall">
         <aside class="nav_hot_sall flex">
@@ -34,8 +36,6 @@
           <aside class="nav_middle"></aside>
           <aside class="nav_left nav_margin_right"></aside>
         </aside>
-
-        <!-- <aside class="shop_btn" :class="btn_color">{{state | btnFilter(marketable)}}</aside> -->
         <aside class="hot_sall_main">
           <aside class="left"
           v-clipboard:copy="top1.code"
@@ -46,7 +46,7 @@
            <div class="hot_sall_top1">
               <article class="top1">{{top1.name?top1.name:''}}</article>
               <article class="capacity">{{top1.caption}}</article>
-              <div class="rush_buy" style="margin: 0.1rem 0">立即抢购</div>
+              <div class="rush_buy">立即抢购</div>
               <article class="coupon" v-if="top1.price !=0"><span>券后</span> <span>¥ {{top1.price }}</span></article>
               <article class="oprice" v-if="top1.marketPrice !=0"><span>原价</span> <span>¥ {{top1.marketPrice}}</span></article>
            </div>
@@ -101,7 +101,7 @@
             <span>大家都在抢</span>
           </aside>
           <aside class="hot_grab_right">
-              <span>{{count}}</span><span>次实时领券</span>
+              <span>1,0979,38</span><span>次实时领券</span>
           </aside>
       </aside>
        <!-- 大家都在抢 -->
@@ -118,11 +118,10 @@
         :title="item.name"
         :marketPrice="item.marketPrice"
         :price="item.price"
-        :marketable="item.marketable"
+       :isMarketable="item.isMarketable"
         :startTime="item.startTime"
         :endTime="item.endTime"
         :sale="item.sales"
-        :state="item.state"
         ></Recommend>
        </article>
   		</div>
