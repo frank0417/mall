@@ -4,6 +4,7 @@
   <Loadmore
     @reachBottom="reach"
     :limit = "20"
+    :showMore ="showMore"
     :loadState="productPageQuery.loadState"
     class="z_index"
     
@@ -22,12 +23,13 @@
           <div class="clock" @click="hideMask = true"></div>
         </div>
       </header>
-        <article class="swiper">
-          <slider ref="slider" :options="options">
-              <slideritem v-for="(item,index) in swiperList" :key="index" :style="item.style">
-                  <img :src="item.thumbnail" alt=""  @click="swiperJump(item.url)" style="width: 100%;height: 100%;">
-              </slideritem>
-          </slider>
+        <article class="swiperWarp">
+        <swiper :options="swiperOption_0">
+          <swiperSlide v-for="(item, key) in swiperList" :key="key">
+            <img :src="item.thumbnail" alt=""  @click="swiperJump(item.url)" style="width: 100%;height: 100%;">
+          </swiperSlide>
+          <div class="swiper-pagination" slot="pagination"></div>
+      </swiper>
        </article>
        <!-- 爆款排行 -->
        <article class="hot_sall">
@@ -101,7 +103,7 @@
             <span>大家都在抢</span>
           </aside>
           <aside class="hot_grab_right">
-              <span>1,0979,38</span><span>次实时领券</span>
+              <span>{{count}}</span><span>次实时领券</span>
           </aside>
       </aside>
        <!-- 大家都在抢 -->
@@ -118,7 +120,8 @@
         :title="item.name"
         :marketPrice="item.marketPrice"
         :price="item.price"
-       :isMarketable="item.isMarketable"
+        :state="item.state"
+        :marketable="item.marketable"
         :startTime="item.startTime"
         :endTime="item.endTime"
         :sale="item.sales"
@@ -164,24 +167,34 @@
 </template>
 
 <script>
-import {swiper,redPacket,message,getTop,productPage,newRedEnvelope} from '../api/index'
- import { slider, slideritem } from 'vue-concise-slider';
+
+import {swiperFunc,redPacket,message,getTop,productPage,newRedEnvelope} from '../api/index'
+//  import { slider, slideritem } from 'vue-concise-slider';
+ import {swiper, swiperSlide} from 'vue-awesome-swiper'
  import Recommend from './recommend'
  import Loadmore from './loadeMore'
  import myScroll  from './vue-scroll'
-
+import { setTimeout } from 'timers';
+  
 export default {
 name: 'Index',
 components: {
-  // slider,
-  // slideritem,
-  slider,
+  swiper,
+  swiperSlide,
   Recommend,
   Loadmore,
   myScroll
 },
 data () {
   return {
+    totalNum:'',
+    showMore:false,
+    swiperOption_0: {
+      loop:true,
+      autoplay:3000,
+      speed: 800,
+      pagination: '.swiper-pagination'
+    },
     scrollState: true, //是否可以滑动
       indexScrollTop:0,
       listdata:[],
@@ -262,38 +275,42 @@ created(){
     this.getSwiper();
   },600000)
 },
+
 methods: {
 
-handleScroll () {
-  let topTemp = this.$refs.myScroll;
-},
-  onRefresh(mun) { // 刷新
-          this.listParams.p = 1;
-          // this.productPageQuery = {
-          //   pageNum:1,
-          //   pageSize:10,
-          //   loading: false,
-          //   totalPage:1,
-          //   loadState:0,
-          // }
-          // this.swiperList = [];
-          // this.messageData = [];
-          // this.productPageData = [];
-          // this.topList = [];
-          //   this.getSwiper();
-            this.getRedPacket();
-            this.getMessage();
-            this.getTopProduct();
-            this.getProductPage(this.productPageQuery.pageNum,this.productPageQuery.pageSize);
-          //   this.getNewRedEnvelope();
-          setTimeout(() => {
-          this.listParams.p++;
-          this.$refs.myScroll.setState(3);
-        }, 3000)
-        },
-        getTopF(y) {//滚动条位置
-            this.indexScrollTop = y;
-        },
+  handleScroll () {
+    let topTemp = this.$refs.myScroll;
+  },
+  /**
+   * 下拉刷新
+   */
+  onRefresh(mun) {
+      this.listParams.p = 1;
+      // this.productPageQuery = {
+      //   pageNum:1,
+      //   pageSize:10,
+      //   loading: false,
+      //   totalPage:1,
+      //   loadState:0,
+      // }
+      // this.swiperList = [];
+      // this.messageData = [];
+      // this.productPageData = [];
+      // this.topList = [];
+      //   this.getSwiper();
+      this.getRedPacket();
+      this.getMessage();
+      this.getTopProduct();
+      this.getProductPage(this.productPageQuery.pageNum,this.productPageQuery.pageSize);
+      //   this.getNewRedEnvelope();
+      setTimeout(() => {
+      this.listParams.p++;
+      this.$refs.myScroll.setState(3);
+    }, 3000)
+  },
+  getTopF(y) {//滚动条位置
+      this.indexScrollTop = y;
+  },
   newRead(){
     this.url= this.new_red_url;
     this.hideMaskRed = false;
@@ -313,15 +330,19 @@ handleScroll () {
     
 
   reach(){
+    
     if (this.productPageQuery.loading) {
       return
     }else {
         this.productPageQuery.loading = true;
-        if (this.productPageQuery.pageNum>this.productPageQuery.totalPage) {
-            this.productPageQuery.loadState = 1;
+        this.showMore = true;
+        if (this.totalNum>this.productPageData.length) {
+            this.getProductPage(this.productPageQuery.pageNum+1,this.productPageQuery.pageSize);
             return;
+        }else{
+          this.productPageQuery.loadState = 1;
         }
-      this.getProductPage(this.productPageQuery.pageNum,this.productPageQuery.pageSize);
+      
     }
   },
   reachMessage(){
@@ -353,41 +374,15 @@ handleScroll () {
     
       let that = this,
       pageNum=1,
-      pageSize=10,
+      pageSize=10*this.productPageQuery.pageNum,
       parames = { pageNum, pageSize }
-      for(let i = 1; i < that.productPageQuery.pageNum; i++){
 
-            parames.pageNum=i;
-            productPage(parames).then(res=>{
-              if(res.code == 200){
-                  if(this.productPageQuery.pageNum == 1){
-                    this.productPageData = res.data.list
-                    this.productPageQuery.totalPage =res.data.totalPage;
-                    if (res.data.totalPage == 1) {
-                      this.productPageQuery.loadState = 1
-                    }
-                  }else{
-                    res.data.list.forEach((item, index) => {
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'name', item.name);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'state', item.state);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'price', item.price);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'thumbnail_temp', item.thumbnail_temp);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'caption', item.caption);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'code', item.code);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'marketable', item.marketable);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'startTime', item.startTime);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'endTime', item.endTime);
-                        this.$set(this.productPageData[(parames.pageNum-1)*this.productPageQuery.pageSize+index],'marketPrice', item.marketPrice);
-                    })
-                
-                  }
-            
-              }
-            })
-          
-       
-      }
-      
+      productPage(parames).then(res=>{
+        if(res.code == 200){
+          that.productPageQuery.totalPage =res.data.totalPage;
+          that.productPageData = res.data.list
+        }
+      })      
   },
   // 抢购商品
   getProductPage(pageNum,pageSize){
@@ -395,17 +390,21 @@ handleScroll () {
       parames = { pageNum, pageSize };
     productPage(parames).then(res=>{
           if(res.code == 200){
-            
-              if(that.productPageQuery.pageNum == 1){
+            that.totalNum = res.data.totalRow;
+              if(pageNum == 1){
                 that.productPageData = res.data.list
                 that.productPageQuery.totalPage =res.data.totalPage;
+                
                 if (res.data.totalPage == 1) {
                   this.productPageQuery.loadState = 1
                 }
               }else{
-                that.productPageData = [].concat(that.productPageData,res.data.list)
+                that.productPageData = [].concat(that.productPageData,res.data.list);
+                setTimeout(()=>{
+                  this.productPageQuery.loadState = 2
+                },1000)
               }
-              that.productPageQuery.pageNum +=1;
+              that.productPageQuery.pageNum =res.data.pageNumber;
               that.productPageQuery.loading = false;
           }
         })
@@ -445,7 +444,7 @@ handleScroll () {
     })
   },
   getSwiper(){
-    swiper().then(res=>{
+    swiperFunc().then(res=>{
       if(res.code == 200){
         this.swiperList = res.data.list;
       }
@@ -460,13 +459,62 @@ handleScroll () {
 
 
 <style>
+.swiperWarp{
+  position: relative;
+}
+.swiper-pagination {
+    position: absolute;
+    text-align: center;
+    transition: .3s;
+    transform: translateZ(0);
+    z-index: 10;
+    bottom: 20px;
+}
+.swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    border-radius: 100%;
+    background: #ffffff;
+    opacity: .6;
+}
+.swiper-container-horizontal>.swiper-pagination-bullets .swiper-pagination-bullet {
+    margin: 0 5px;
+}
+.swiper-container-horizontal>.swiper-pagination-bullets, .swiper-pagination-custom, .swiper-pagination-fraction {
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+}
+.swiper-pagination-bullet-active {
+    background: #e01212;
+    opacity: 0.8 !important;
+}
+.swiper-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: -ms-flexbox;
+    display: flex;
+    transition-property: transform;
+    box-sizing: content-box;
+}
+.swiper-slide {
+    -webkit-flex-shrink: 0;
+    -ms-flex: 0 0 auto;
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
    .swiper-container-horizontal>*>.slider-pagination-bullet{
     background:  #fff none repeat scroll 0 0 !important;
     opacity: .6 !important;
   }
   .swiper-container-horizontal .slider-pagination-bullet-active{
      background: #e01212 none repeat scroll 0 0 !important;
-     opacity: 1 !important;
+     
   }
 </style>
 <style scoped>
@@ -598,10 +646,7 @@ handleScroll () {
   height: 0.54rem;
   background: url("../assets/image/xitongxiaoxi.png") no-repeat center/contain;
 }
-/* .swiper{
-  width: 100%;
-  height: 3rem;
-} */
+
 /* 爆款排行 */
 .hot_sall{
   box-sizing: border-box;

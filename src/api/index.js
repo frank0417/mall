@@ -21,7 +21,7 @@ axios.interceptors.request.use(
   return Promise.reject(error)
 })
 // 轮播广告接口
-export const swiper = () => {
+export const swiperFunc = () => {
   return axios.get("/ad/getAd").then(res => res.data);
 }
 // 红包

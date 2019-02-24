@@ -107,7 +107,6 @@ import { clearInterval } from 'timers';
           }
         },
         created(){
-          console.log("created");
           this.getTimeRec(this.state,this.marketable);
         }
     }

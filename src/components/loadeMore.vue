@@ -1,7 +1,7 @@
 <template>
-	<div class="load_more" @scroll="reachBottom($event.target)">
+	<div  class="load_more" @scroll="reachBottom($event.target)">
 		<slot style="min-height:100vh"></slot>
-		<div class="load" v-html="text[loadState]"></div>
+		<div  class="load" v-html="text[loadState]"></div>
 	</div>
 </template>
 
@@ -16,17 +16,20 @@ export default{
 		text:{
 			type:Array,
 			default:()=> {
-				return ['正在加载...','亲，到底了 ^-^','没有数据']
+				return ['正在加载...','亲，到底了 ^-^','没有数据','']
 			}
 		},
 		loadState:{
 			type:Number,
 			default:0
+		},
+		showMore:{
+			type:Boolean,
+			default:true
 		}
 	},
 	methods:{
 		reachBottom(e){
-
 			if(this.loadState==1 || this.loadState==2){
 				//this.$destroy();
 				return;
@@ -35,10 +38,25 @@ export default{
 				h=e.offsetHeight,
 				scrollH=e.scrollHeight;
 
-			if(scrollT+h+this.limit>=scrollH){
-				// this.$emit('reachBottom',true);
+			if(scrollT+h+this.limit<scrollH){
+				this.$emit('reachBottom',true);
 			};
 
+		}
+	},
+
+	watch:{
+		loadState:{
+			immediate:true,
+			handler(val){
+				this.loadState = val;
+			}
+		},
+		showMore:{
+			immediate:true,
+			handler(val){
+				this.showMore = val;
+			}
 		}
 	}
 }
