@@ -169,7 +169,6 @@
 <script>
 
 import {swiperFunc,redPacket,message,getTop,productPage,newRedEnvelope} from '../api/index'
-//  import { slider, slideritem } from 'vue-concise-slider';
  import {swiper, swiperSlide} from 'vue-awesome-swiper'
  import Recommend from './recommend'
  import Loadmore from './loadeMore'
