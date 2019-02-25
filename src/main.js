@@ -4,11 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import VueClipboard from 'vue-clipboard2'
+import VueScroller from 'vue-scroller'
 
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 
 Vue.config.productionTip = false
 Vue.use(VueAwesomeSwiper)
+Vue.use(VueScroller)
 Vue.use(VueClipboard)
 /* eslint-disable no-new */
 new Vue({

@@ -129,11 +129,13 @@ export default {
     },
     touchStart(e) {
       //触摸事件
+      
       this.pageX = e.targetTouches[0].pageX;
       this.pageY = e.targetTouches[0].pageY;
     },
     touchMove(e) {
       //触摸滑动事件
+      
       this.scrollPosition = this.myScroll.scrollTop; //获取滚动条位置
       if (this.scrollState && e.targetTouches[0].pageY > this.pageY) {
         //向上滑动
@@ -156,6 +158,7 @@ export default {
       }
     },
     touchEnd(e) {
+      
       if ((this.aspect == 2 && this.state == 2) || this.state == 1) {
         //上拉处理
         this.top = 100;
@@ -171,6 +174,7 @@ export default {
       let listScrollTop = e.target.scrollTop + this.myScroll.offsetHeight; //当前滚动条位置
 
       if (this.state == 0 && listHeight - listScrollTop < 100) {
+        
         this.bottomCallback();
       }
 
